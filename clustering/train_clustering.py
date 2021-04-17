@@ -23,18 +23,23 @@ def build_dataframe(path, num_samples, selected_cols):
     Returns:
 
     """
+    # Read data from file into Panda structure
     dataframe = pd.DataFrame(parse(path))
+
+    # randomly select num_sample number of rows
+    if num_samples != "MAX":
+        dataframe = dataframe.sample(n=num_samples)
+    print("Number of rows: " + str(len(dataframe.index)))
     print(dataframe.head())
 
     # Only keep selected columns
     dataframe = dataframe[selected_cols].copy()
-    print(dataframe.head())
+    # print(dataframe.head())
 
     # One hot encode categorical columns
     categorical_cols = selected_cols  # temp
-    onehotencode = pd.get_dummies(dataframe, columns=categorical_cols)
-    dataframe = pd.concat([dataframe, onehotencode], axis=1)
-    print(dataframe.head())
+    dataframe = pd.get_dummies(dataframe, columns=categorical_cols)
+    # print(dataframe.head())
     return dataframe
 
 
@@ -42,14 +47,14 @@ def kmeans_clustering(dataframe):
     kmeans = KMeans(n_clusters=2, random_state=0).fit(dataframe)
     centroids = kmeans.cluster_centers_
     print(centroids)
+    return centroids
 
 
 if __name__ == "__main__":
-    # Testing
+    # For steam_games.json.gz
     path = "../data/steam_games.json.gz"
-    # selected_cols = [
-    #     "publisher", "genres", "app_name", "title", "developer", "sentiment"
-    # ]
-    selected_cols = ["publisher"]
-    dataframe = build_dataframe(path, "", selected_cols)
-    # kmeans_clustering(dataframe)
+    selected_cols = [
+        "publisher", "app_name", "title", "developer", "sentiment"
+    ]
+    dataframe = build_dataframe(path, 1000, selected_cols)
+    kmeans_clustering(dataframe)
