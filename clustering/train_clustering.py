@@ -1,6 +1,7 @@
 import gzip
 import pandas as pd
 from sklearn.cluster import KMeans
+from joblib import dump
 
 # This file is for Michael
 
@@ -33,28 +34,47 @@ def build_dataframe(path, num_samples, selected_cols):
     print(dataframe.head())
 
     # Only keep selected columns
-    dataframe = dataframe[selected_cols].copy()
+    dataframe = dataframe[selected_cols + ["id"]].copy()
     # print(dataframe.head())
 
     # One hot encode categorical columns
     categorical_cols = selected_cols  # temp
-    dataframe = pd.get_dummies(dataframe, columns=categorical_cols)
+    dataframe = pd.get_dummies(dataframe, columns=categorical_cols, prefix=categorical_cols)
     # print(dataframe.head())
     return dataframe
 
 
-def kmeans_clustering(dataframe):
-    kmeans = KMeans(n_clusters=2, random_state=0).fit(dataframe)
-    centroids = kmeans.cluster_centers_
-    print(centroids)
-    return centroids
+def kmeans_fit(data_frame, min_cluster=2, max_cluster=10, min_improvement=.25):
+
+    last_loss = 0
+    k_means_fit = None
+    num_clusters = list(range(min_cluster, max_cluster))
+    for i in range(len(num_clusters)):
+        k_means = KMeans(n_clusters=num_clusters, random_state=0).fit(data_frame)
+        if i == 0 or k_means.inertia_ <= last_loss * (1 - min_improvement):
+            last_loss = k_means.inertia_
+            k_means_fit = k_means
+        else:
+            break
+    return k_means_fit
+
+
+# def get_centroids(k_means):
+#     kmeans = KMeans(n_clusters=2, random_state=0).fit(dataframe)
+#     centroids = kmeans.cluster_centers_
+#     print(centroids)
+#     return centroids
 
 
 if __name__ == "__main__":
     # For steam_games.json.gz
     path = "../data/steam_games.json.gz"
     selected_cols = [
-        "publisher", "app_name", "title", "developer", "sentiment"
+        "publisher", "app_name", "title", "developer", "sentiment",  "price"
     ]
     dataframe = build_dataframe(path, 1000, selected_cols)
-    kmeans_clustering(dataframe)
+    dataframe.to_csv("clustering_examples.csv", index_col=False)
+    dataframe.drop("id", inplace=True)
+
+    sol = kmeans_fit(dataframe)
+    dump(sol, "clustering/kmeans_fit.bin")
