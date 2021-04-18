@@ -1,7 +1,11 @@
 import sklearn
+from joblib import load
+import pandas as pd
+import sys
+import json
 
 
-def find_cluster_attributes(k_means_labels, all_items, item, features_use):
+def find_cluster_attributes(k_means, all_items, item, num_features_use, cat_features_use):
     """
 
     Args:
@@ -15,18 +19,40 @@ def find_cluster_attributes(k_means_labels, all_items, item, features_use):
     features we are looking at to explain the item's selection. )
     """
 
-    all_items["labels"] = k_means_labels
+    all_items["labels"] = k_means.labels_
 
     item_label = all_items.loc[all_items.id == item["id"], ["label"]]
 
     common_cluster = all_items[all_items.label == item_label]
 
+    means = {}
+    for feature in num_features_use:
+        means["feature"] = common_cluster[feature].means()
+
     modes = {}
-    for feature in features_use:
-        # TODO: Add code to decode one hot encoded attributes.
-        modes["feature"] = common_cluster[feature].mode()
+    for feature in cat_features_use:
+        max_cnt = 0
+        max_val = ""
+        one_hot_cols = list(filter(lambda x: feature in x, common_cluster.columns))
+        for col in one_hot_cols:
+            curr_cnt = common_cluster[col].sum()
+            if max_cnt < curr_cnt:
+                curr_cnt = max_cnt
+                max_val = col.lstrip(feature + "_")
+        modes[feature] = max_val
 
-    return modes
+    return modes, means
 
 
+def main():
+    k_means = load("clustering/kmeans_fit.bin")
+    df = pd.read_csv("clustering_examples.csv", index_col=False)
+    item_path = sys.argv[1]
+    with open(item_path, "r") as fp:
+        item = json.load(fp)
 
+    print(find_cluster_attributes(k_means, df, item, ["publisher", "app_name", "title", "developer"], ["price"]))
+
+
+if __name__ == '__main__':
+    main()
