@@ -1,3 +1,5 @@
+import json
+
 import sklearn
 from joblib import load
 import pandas as pd
@@ -57,7 +59,12 @@ def main():
     with open(item_path, "r") as fp:
         item = eval(fp.read())
 
-    print(find_cluster_attributes(k_means, df, item, ["publisher", "app_name", "title", "developer"], ["price"]))
+    modes, means = find_cluster_attributes(k_means, df, item, ["publisher", "app_name", "title", "developer"], ["price"])
+
+    with open("out.num_attrs.json", "w") as fp:
+        json.dump(means, fp)
+    with open("out.cat_attrs.json", "w") as fp:
+        json.dump(modes, fp)
 
 
 if __name__ == '__main__':
