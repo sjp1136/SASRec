@@ -14,7 +14,7 @@ def parse(path):
     return result
 
 
-def build_dataframe(path, num_samples, selected_cols):
+def build_dataframe(path, num_samples, categorical_cols, num_cols):
     """
     Builds a dataframe from the repository of steam reviews keeping only the selected columns.
     Args:
@@ -34,13 +34,11 @@ def build_dataframe(path, num_samples, selected_cols):
     print(dataframe.head())
 
     # Only keep selected columns
-    dataframe = dataframe[selected_cols + ["id"]].copy()
-    # print(dataframe.head())
+    dataframe = dataframe[categorical_cols + num_cols + ["id"]].copy()
 
     # One hot encode categorical columns
-    categorical_cols = selected_cols  # temp
     dataframe = pd.get_dummies(dataframe, columns=categorical_cols, prefix=categorical_cols)
-    # print(dataframe.head())
+
     return dataframe
 
 
@@ -69,10 +67,11 @@ def kmeans_fit(data_frame, min_cluster=2, max_cluster=10, min_improvement=.25):
 if __name__ == "__main__":
     # For steam_games.json.gz
     path = "../data/steam_games.json.gz"
-    selected_cols = [
-        "publisher", "app_name", "title", "developer", "sentiment",  "price"
+    cat_cols = [
+        "publisher", "app_name", "title", "developer", "sentiment"
     ]
-    dataframe = build_dataframe(path, 1000, selected_cols)
+    num_cols = ["price"]
+    dataframe = build_dataframe(path, 1000, cat_cols, num_cols)
     dataframe.to_csv("clustering_examples.csv", index_col=False)
     dataframe.drop("id", inplace=True)
 

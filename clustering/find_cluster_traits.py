@@ -21,7 +21,10 @@ def find_cluster_attributes(k_means, all_items, item, num_features_use, cat_feat
 
     all_items["labels"] = k_means.labels_
 
-    item_label = all_items.loc[all_items.id == item["id"], ["label"]]
+    item_df = pd.DataFrame(item)
+    item_df = item_df[num_features_use + cat_features_use].copy()
+    item_df = pd.get_dummies(item_df, columns=num_features_use, prefix=cat_features_use)
+    item_label = k_means.predict(item_df)[0]
 
     common_cluster = all_items[all_items.label == item_label]
 
@@ -49,7 +52,7 @@ def main():
     df = pd.read_csv("clustering_examples.csv", index_col=False)
     item_path = sys.argv[1]
     with open(item_path, "r") as fp:
-        item = json.load(fp)
+        item = eval(fp.read())
 
     print(find_cluster_attributes(k_means, df, item, ["publisher", "app_name", "title", "developer"], ["price"]))
 
