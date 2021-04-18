@@ -2,7 +2,13 @@ import sklearn
 from joblib import load
 import pandas as pd
 import sys
-import json
+
+def get_item_label(item_dict, k_means, num_features_use, cat_features_use):
+    item_df = pd.DataFrame(item_dict)
+    item_df = item_df[num_features_use + cat_features_use].copy()
+    item_df = pd.get_dummies(item_df, columns=num_features_use, prefix=cat_features_use)
+    item_label = k_means.predict(item_df)[0]
+    return item_label
 
 
 def find_cluster_attributes(k_means, all_items, item, num_features_use, cat_features_use):
@@ -21,10 +27,7 @@ def find_cluster_attributes(k_means, all_items, item, num_features_use, cat_feat
 
     all_items["labels"] = k_means.labels_
 
-    item_df = pd.DataFrame(item)
-    item_df = item_df[num_features_use + cat_features_use].copy()
-    item_df = pd.get_dummies(item_df, columns=num_features_use, prefix=cat_features_use)
-    item_label = k_means.predict(item_df)[0]
+    item_label = get_item_label(item, k_means, num_features_use, cat_features_use)
 
     common_cluster = all_items[all_items.label == item_label]
 
@@ -40,7 +43,7 @@ def find_cluster_attributes(k_means, all_items, item, num_features_use, cat_feat
         for col in one_hot_cols:
             curr_cnt = common_cluster[col].sum()
             if max_cnt < curr_cnt:
-                curr_cnt = max_cnt
+                max_cnt = curr_cnt
                 max_val = col.lstrip(feature + "_")
         modes[feature] = max_val
 
