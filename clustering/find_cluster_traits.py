@@ -6,7 +6,6 @@ import pandas as pd
 import sys
 
 
-
 def get_item_label(item_dict, k_means, num_features_use, cat_features_use):
     item_df = pd.DataFrame(item_dict)
     item_df = item_df[num_features_use + cat_features_use].copy()
@@ -57,6 +56,7 @@ def find_cluster_attributes(k_means, all_items, item, num_features_use, cat_feat
 def main():
     with open("clustering/kmeans_fit.bin", "rb") as fp:
         k_means = load(fp)
+
     df = pd.read_csv("clustering_examples.csv", index_col=False)
     item_path = sys.argv[1]
     with open(item_path, "r") as fp:
@@ -64,6 +64,7 @@ def main():
 
     modes, means = find_cluster_attributes(k_means, df, item, ["publisher", "app_name", "title", "developer"],
                                            ["price"])
+
 
     with open("out.num_attrs.json", "w") as fp:
         json.dump(means, fp)

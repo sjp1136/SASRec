@@ -1,6 +1,7 @@
 import gzip
 
 import numpy as np
+
 import pandas as pd
 from sklearn.cluster import KMeans
 from joblib import dump
@@ -42,6 +43,11 @@ def build_dataframe(path, num_samples, categorical_cols, num_cols):
     # Only keep selected columns
     dataframe = dataframe[categorical_cols + num_cols + ["id"]].copy()
     print(dataframe.columns)
+    print("Number of rows: " + str(len(dataframe.index)))
+    print(dataframe.head())
+
+    # Only keep selected columns
+    dataframe = dataframe[categorical_cols + num_cols + ["id"]].copy()
 
     # One hot encode categorical columns
     dataframe = pd.get_dummies(dataframe, columns=categorical_cols, prefix=categorical_cols)
@@ -85,6 +91,8 @@ def main():
     sol = kmeans_fit(dataframe, min_improvement=.2)
     with open("kmeans_fit.bin", "wb") as fp:
         dump(sol, fp)
+
+
 
 
 if __name__ == "__main__":
