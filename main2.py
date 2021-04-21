@@ -28,6 +28,9 @@ sess = tf.Session(config=config)
 model = Model(usernum, itemnum, args)
 sess.run(tf.initialize_all_variables())
 
+checkpoint_path = "checkpoints/mode.ckpt"
+model.load_weights(checkpoint_path)
+
 t_test = evaluate(model, dataset, args, sess)
 t_valid = evaluate_valid(model, dataset, args, sess)
 print 'time: %f(s), valid (NDCG@10: %.4f, HR@10: %.4f), test (NDCG@10: %.4f, HR@10: %.4f)' % (T, t_valid[0], t_valid[1], t_test[0], t_test[1])

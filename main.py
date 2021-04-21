@@ -28,6 +28,7 @@ parser.add_argument('--dropout_rate', default=0.5, type=float)
 parser.add_argument('--l2_emb', default=0.0, type=float)
 
 args = parser.parse_args()
+print(args)
 if not os.path.isdir(args.dataset + '_' + args.train_dir):
     os.makedirs(args.dataset + '_' + args.train_dir)
 with open(os.path.join(args.dataset + '_' + args.train_dir, 'args.txt'), 'w') as f:
@@ -59,12 +60,13 @@ try:
     for epoch in range(1, args.num_epochs + 1):
 
         for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
-            u, seq, pos, neg = sampler.next_batch()
+	    u, seq, pos, neg = sampler.next_batch()
+	    #print(pos)
             auc, loss, _ = sess.run([model.auc, model.loss, model.train_op],
                                     {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg,
                                      model.is_training: True})
 
-        if epoch % 20 == 0:
+        if epoch % 3 == 0:
             t1 = time.time() - t0
             T += t1
             print 'Evaluating',
@@ -73,6 +75,7 @@ try:
             print ''
             print 'epoch:%d, time: %f(s), valid (NDCG@10: %.4f, HR@10: %.4f), test (NDCG@10: %.4f, HR@10: %.4f)' % (
             epoch, T, t_valid[0], t_valid[1], t_test[0], t_test[1])
+	    print(t_test)
 
             f.write(str(t_valid) + ' ' + str(t_test) + '\n')
             f.flush()
