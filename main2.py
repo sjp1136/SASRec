@@ -32,6 +32,8 @@ sess = tf.Session(config=config)
 model = Model(usernum, itemnum, args)
 sess.run(tf.initialize_all_variables())
 
+model.summary()
+
 checkpoint_path = "checkpoints/model.ckpt"
 model.load_weights(checkpoint_path)
 
