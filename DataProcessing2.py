@@ -18,8 +18,8 @@ dataset_name = 'steam'
 f = open(dataset_name + '_reviews' + '.txt', 'w')
 for l in parse(dataset_name + '_reviews' + '.json.gz'):
     line += 1
-    if line > counter:
-        break
+    #if line > counter:
+    #    break
     # products = str(l['products'])
     # hours = str(l['hours'])
     f.write(u' '.join([l['username'], l['product_id'], l['date'],l['text']]).encode('utf-8').strip() + ' \n')
@@ -40,8 +40,8 @@ line = 0
 User = dict()
 
 for l in parse(dataset_name + '_reviews' + '.json.gz'):
-    if line > counter:
-        break
+    #if line > counter:
+    #    break
     line += 1
     product_id = l['product_id']
     username = l['username']
