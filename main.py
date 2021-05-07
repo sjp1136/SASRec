@@ -81,11 +81,11 @@ try:
             f.write(str(t_valid) + ' ' + str(t_test) + '\n')
             f.flush()
             t0 = time.time()
+	    break
+        break
     saver = tf.train.Saver()
-    saver.save(sess, "./checkpoints/model.ckpt")
-
-    
-#model.save_weights('./checkpoints/')
+    saver.save(sess, "./checkpoints2/model.ckpt")
+    model.save_weights('./checkpoints2/')
 except:
     sampler.close()
     f.close()

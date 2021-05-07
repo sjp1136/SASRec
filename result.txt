@@ -1,0 +1,1 @@
+Result: valid (NDCG@10: 0.1066, HR@10: 0.1996), test (NDCG@10: 0.1090, HR@10: 0.1979)

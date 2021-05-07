@@ -15,7 +15,7 @@ def data_partition(fname):
     # assume user/item index starting from 1
     f = open('data/%s.txt' % fname, 'r')
     for line in f:
-        u, i = line.rstrip().split(' ')
+        u, i, line_index = line.rstrip().split(' ')
         u = int(u)
         i = int(i)
         usernum = max(u, usernum)
@@ -114,6 +114,7 @@ def evaluate_valid(model, dataset, args, sess):
             item_idx.append(t)
 
         predictions = -model.predict(sess, [u], [seq], item_idx)
+	print(predictions)
         predictions = predictions[0]
 
         rank = predictions.argsort().argsort()[0]
