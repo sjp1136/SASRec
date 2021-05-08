@@ -87,6 +87,9 @@ def evaluate(model, dataset, args, sess):
 
 def evaluate_valid(model, dataset, args, sess):
     [train, valid, test, usernum, itemnum] = copy.deepcopy(dataset)
+    #print("TRAIN")
+    #print(train)
+    #f2 = open("mapping.txt", "a")
 
     NDCG = 0.0
     valid_user = 0.0
@@ -114,11 +117,22 @@ def evaluate_valid(model, dataset, args, sess):
             item_idx.append(t)
 
         predictions = -model.predict(sess, [u], [seq], item_idx)
-	print(predictions)
+	
+	#print("FIRST PREDICTIONS\n")
+	#print(predictions)
+	#print("SECOND PREDICTIONS\n")
         predictions = predictions[0]
-
+	#print(predictions)
+        pred_max = np.argmax(predictions)
+	print(u)
+	print(pred_max)
+	with open('mapping.txt', 'a') as f2:
+	    print(str(u) + " " + str(pred_max) + "\n")
+    	    f2.write(str(u) + " " + str(pred_max) + "\n")
+	#print("RANK\n")
         rank = predictions.argsort().argsort()[0]
-
+	#print(rank)
+	#print("END RANK\n")
         valid_user += 1
 
         if rank < 10:
@@ -127,5 +141,4 @@ def evaluate_valid(model, dataset, args, sess):
         if valid_user % 100 == 0:
             print '.',
             sys.stdout.flush()
-
     return NDCG / valid_user, HT / valid_user

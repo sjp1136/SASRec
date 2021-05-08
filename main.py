@@ -34,8 +34,6 @@ with open(os.path.join(args.dataset + '_' + args.train_dir, 'args.txt'), 'w') as
     f.write('\n'.join([str(k) + ',' + str(v) for k, v in sorted(vars(args).items(), key=lambda x: x[0])]))
 f.close()
 
-print("hello")
-print(args.dataset)
 dataset = data_partition(args.dataset)
 [user_train, user_valid, user_test, usernum, itemnum] = dataset
 num_batch = len(user_train) / args.batch_size
@@ -58,21 +56,27 @@ T = 0.0
 t0 = time.time()
 
 try:
+    print "HELLO"
     for epoch in range(1, args.num_epochs + 1):
-
+        print "HELLO2"
         for step in tqdm(range(num_batch), total=num_batch, ncols=70, leave=False, unit='b'):
 	    u, seq, pos, neg = sampler.next_batch()
 	    #print(pos)
             auc, loss, _ = sess.run([model.auc, model.loss, model.train_op],
                                     {model.u: u, model.input_seq: seq, model.pos: pos, model.neg: neg,
                                      model.is_training: True})
-
-        if epoch % 3 == 0:
+        print "HELLO3"
+	# Change here
+        if epoch % 1 == 0:
             t1 = time.time() - t0
             T += t1
             print 'Evaluating',
             t_test = evaluate(model, dataset, args, sess)
             t_valid = evaluate_valid(model, dataset, args, sess)
+
+	    #Do stuff here
+            print 'WENT THROUGH'
+            
             print ''
             print 'epoch:%d, time: %f(s), valid (NDCG@10: %.4f, HR@10: %.4f), test (NDCG@10: %.4f, HR@10: %.4f)' % (
             epoch, T, t_valid[0], t_valid[1], t_test[0], t_test[1])
@@ -83,9 +87,9 @@ try:
             t0 = time.time()
 	    break
         break
-    saver = tf.train.Saver()
-    saver.save(sess, "./checkpoints2/model.ckpt")
-    model.save_weights('./checkpoints2/')
+    #saver = tf.train.Saver()
+    #saver.save(sess, "./checkpoints2/model.ckpt")
+    #model.save_weights('./checkpoints2/')
 except:
     sampler.close()
     f.close()
@@ -93,4 +97,3 @@ except:
 
 f.close()
 sampler.close()
-print("Done")
