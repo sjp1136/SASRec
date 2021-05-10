@@ -7,9 +7,13 @@ import sys
 
 
 def get_item_label(item_dict, k_means, num_features_use, cat_features_use):
+    for key in item_dict.keys():
+        item_dict[key] = [item_dict[key]]
     item_df = pd.DataFrame(item_dict)
+    print(item_df.columns)
     item_df = item_df[num_features_use + cat_features_use].copy()
-    item_df = pd.get_dummies(item_df, columns=num_features_use, prefix=cat_features_use)
+    item_df = pd.get_dummies(item_df, columns=cat_features_use, prefix=cat_features_use)
+    item_df["early_access_True"] = 0
     item_label = k_means.predict(item_df)[0]
     return item_label
 
@@ -32,11 +36,11 @@ def find_cluster_attributes(k_means, all_items, item, num_features_use, cat_feat
 
     item_label = get_item_label(item, k_means, num_features_use, cat_features_use)
 
-    common_cluster = all_items[all_items.label == item_label]
+    common_cluster = all_items[all_items.labels == item_label]
 
     means = {}
     for feature in num_features_use:
-        means["feature"] = common_cluster[feature].means()
+        means[feature] = common_cluster[feature].mean()
 
     modes = {}
     for feature in cat_features_use:
@@ -50,27 +54,26 @@ def find_cluster_attributes(k_means, all_items, item, num_features_use, cat_feat
                 max_val = col.lstrip(feature + "_")
         modes[feature] = max_val
 
-    return modes, means
+    return modes, means, item_label
 
 
 def main():
     with open("clustering/kmeans_fit.bin", "rb") as fp:
         k_means = load(fp)
 
-    df = pd.read_csv("clustering_examples.csv", index_col=False)
+    df = pd.read_csv("clustering/clustering_examples.csv", index_col=False)
     item_path = sys.argv[1]
     with open(item_path, "r") as fp:
-        item = eval(fp.read())
+        for line in fp:
+            item = eval(line)
 
-    modes, means = find_cluster_attributes(k_means, df, item, ["publisher", "app_name", "title", "developer"],
-                                           ["price"])
+            modes, means, label = find_cluster_attributes(k_means, df, item, ["hours", "products"],
+                                                   ["early_access"])
 
 
-    with open("out.num_attrs.json", "w") as fp:
-        json.dump(means, fp)
-    with open("out.cat_attrs.json", "w") as fp:
-        json.dump(modes, fp)
-
+            with open("data/clustering_traits_out/out.cluster_attrs." + str(item["product_id"][0]) + ".json", "w") as fp_curr:
+                json.dump({**means, **modes, **{"cluster": str(label)}}, fp_curr)
+                fp_curr.write("\n")
 
 if __name__ == '__main__':
     main()
