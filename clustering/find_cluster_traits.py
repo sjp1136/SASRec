@@ -13,8 +13,13 @@ def get_item_label(item_dict, k_means, num_features_use, cat_features_use):
     print(item_df.columns)
     item_df = item_df[num_features_use + cat_features_use].copy()
     item_df = pd.get_dummies(item_df, columns=cat_features_use, prefix=cat_features_use)
-    item_df["early_access_True"] = 0
+    if "early_access_True" not in item_df.columns:
+        item_df["early_access_True"] = 0
+    if "early_access_False" not in item_df.columns:
+        item_df["early_access_False"] = 0
+    print(item_df)
     item_label = k_means.predict(item_df)[0]
+
     return item_label
 
 
